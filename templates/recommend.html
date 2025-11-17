@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block head %}
+<style>
+    /* Custom styles for the recommendation page */
+    .result-box {
+        margin-top: 20px;
+        padding: 20px;
+        border-radius: 10px;
+        background-color: #e6f7ff; /* Light blue/cyan for success */
+        border-left: 5px solid #00a0dc; /* Stronger blue line */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        display: none;
+    }
+    .result-box h4 {
+        color: #007bb5;
+        font-weight: 600;
+    }
+    .result-box.error {
+        background-color: #ffebe6; /* Light red/peach for error */
+        border-left: 5px solid #ff4d4f; /* Strong red line */
+    }
+    .result-box.error h4 {
+        color: #cf1322;
+    }
+    .loading-spinner {
+        display: none;
+    }
+    h1 {
+        color: #0d47a1; /* Dark blue for main title */
+        font-weight: 800;
+    }
+    .card {
+        border: 1px solid #e0e0e0; /* Subtle border for definition */
+    }
+    legend {
+        color: #0d47a1;
+        font-size: 1.25rem;
+        font-weight: 600;
+        border-bottom: 2px solid #e0e0e0;
+        padding-bottom: 5px;
+        margin-bottom: 20px;
+    }
+    .form-label {
+        font-weight: 500;
+        color: #333;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-md-11 col-lg-10">
+        <div class="card p-4">
+            <div class="card-body">
+                <h1 class="card-title text-center mb-2">Precision Fertilizer Advisor 🌾</h1>
+                <p class="text-center text-secondary mb-5">
+                    Enter the parameters below for an **AI-driven, tailored recommendation** to optimize your crop's yield and health.
+                </p>
+
+                <form id="predictionForm" class="row g-4">
+                    
+                    <fieldset class="col-12 border p-3 rounded-3 mb-4">
+                        <legend class="w-auto px-2">1. Environmental Conditions</legend>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="temperature" class="form-label">Temperature (C)</label>
+                                <input type="number" step="0.01" class="form-control" id="temperature" value="25" required aria-describedby="tempHelp">
+                                <span id="tempHelp" class="form-text text-muted">Typical range: 10°C - 40°C</span>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="moisture" class="form-label">Moisture (%)</label>
+                                <input type="number" step="0.01" class="form-control" id="moisture" value="60" required aria-describedby="moistureHelp">
+                                <span id="moistureHelp" class="form-text text-muted">Soil water content percentage.</span>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="ph" class="form-label">PH Value</label>
+                                <input type="number" step="0.01" class="form-control" id="ph" value="6.5" required aria-describedby="phHelp">
+                                <span id="phHelp" class="form-text text-muted">Acidity/Alkalinity (1-14). Ideal is 6.0 - 7.5.</span>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="col-12 border p-3 rounded-3 mb-4">
+                        <legend class="w-auto px-2">2. Soil Nutrient Levels (NPK)</legend>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="nitrogen" class="form-label">Nitrogen (N) (kg/ha)</label>
+                                <input type="number" step="0.01" class="form-control" id="nitrogen" value="70" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="phosphorous" class="form-label">Phosphorous (P) (kg/ha)</label>
+                                <input type="number" step="0.01" class="form-control" id="phosphorous" value="50" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="potassium" class="form-label">Potassium (K) (kg/ha)</label>
+                                <input type="number" step="0.01" class="form-control" id="potassium" value="50" required>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="col-12 border p-3 rounded-3 mb-4">
+                        <legend class="w-auto px-2">3. Soil & Crop Context</legend>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="carbon" class="form-label">Organic Carbon (%)</label>
+                                <input type="number" step="0.01" class="form-control" id="carbon" value="1.5" required aria-describedby="carbonHelp">
+                                <span id="carbonHelp" class="form-text text-muted">Indicates soil fertility and health.</span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="soil" class="form-label">Soil Type</label>
+                                <select class="form-select" id="soil" required>
+                                    <option value="" disabled selected>Select Soil Type</option>
+                                    {% for soil in soil_options %}
+                                    <option value="{{ soil }}">{{ soil }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="crop" class="form-label">Crop Type</label>
+                                <select class="form-select" id="crop" required>
+                                    <option value="" disabled selected>Select Crop</option>
+                                    {% for crop in crop_options %}
+                                    <option value="{{ crop }}">{{ crop }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </fieldset>
+                    
+                    <div class="col-12 mt-4 text-center">
+                        <button type="submit" class="btn btn-lg btn-success w-75 py-3 shadow-lg">
+                            <span class="loading-spinner spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            Generate Recommendation
+                        </button>
+                    </div>
+                </form>
+
+                <div id="resultBox" class="result-box text-center">
+                    <h4 id="resultTitle" class="mb-2">Recommended Fertilizer:</h4>
+                    <p id="resultText" class="fs-2 fw-bold"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('predictionForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        
+        const form = event.target;
+        const submitButton = form.querySelector('button[type="submit"]');
+        const loadingSpinner = form.querySelector('.loading-spinner');
+        const resultBox = document.getElementById('resultBox');
+        const resultText = document.getElementById('resultText');
+
+        // Show loading state and disable button
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="loading-spinner spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...';
+        resultBox.style.display = 'none';
+        
+        // Gather data from the form
+        const inputData = {
+            Temperature: document.getElementById('temperature').value,
+            Moisture: document.getElementById('moisture').value,
+            PH: document.getElementById('ph').value,
+            Nitrogen: document.getElementById('nitrogen').value,
+            Phosphorous: document.getElementById('phosphorous').value,
+            Potassium: document.getElementById('potassium').value,
+            Carbon: document.getElementById('carbon').value,
+            Soil: document.getElementById('soil').value,
+            Crop: document.getElementById('crop').value,
+        };
+
+        try {
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(inputData)
+            });
+
+            const data = await response.json();
+
+            // Reset result box classes
+            resultBox.classList.remove('error');
+            resultBox.classList.add('animate__animated', 'animate__fadeIn'); // Optional: Add animation if you use Animate.css
+
+            if (response.ok && data.success) {
+                resultText.textContent = data.fertilizer_recommendation;
+                resultBox.style.display = 'block';
+                resultBox.querySelector('h4').textContent = '✅ Recommended Fertilizer:';
+                
+            } else {
+                // Handle API error or validation error
+                const errorMessage = data.error || 'Prediction failed due to an unknown server error.';
+                resultText.textContent = errorMessage;
+                resultBox.style.display = 'block';
+                resultBox.classList.add('error'); // Apply error styling
+                resultBox.querySelector('h4').textContent = '⚠️ Recommendation Error:';
+            }
+
+        } catch (error) {
+            console.error('Fetch error:', error);
+            resultBox.classList.add('error');
+            resultText.textContent = 'Network Error: Could not connect to the server.';
+            resultBox.style.display = 'block';
+            resultBox.querySelector('h4').textContent = '⚠️ Connection Error:';
+            
+        } finally {
+            // Re-enable button
+            submitButton.disabled = false;
+            submitButton.innerHTML = 'Generate Recommendation';
+        }
+    });
+</script>
+{% endblock %}

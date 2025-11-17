@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome to SmartFarm Advisor{% endblock %}
+
+{% block content %}
+<header class="p-5 text-center bg-light rounded-3 mb-5" style="background: url('https://picsum.photos/id/1084/1000/400') no-repeat center center; background-size: cover; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.6);">
+    <div style="background-color: rgba(0, 0, 0, 0.4); padding: 30px; border-radius: 10px;">
+        <h1 class="display-3 fw-bold">Optimize Your Harvest 🌱</h1>
+        <p class="fs-4 mt-3">Precision fertilizer recommendations based on soil health, crop, and environmental data.</p>
+        <hr class="my-4 border-light">
+        <p>Harness the power of Machine Learning to maximize yield and minimize waste.</p>
+        <a class="btn btn-success btn-lg mt-3 shadow-sm" href="/recommend" role="button">Start Recommendation Now →</a>
+    </div>
+</header>
+
+<section class="row text-center mb-5">
+    <h2 class="mb-4 text-secondary">Why Use Our System?</h2>
+    
+    <div class="col-md-4">
+        <div class="card p-4 h-100">
+            <h3 class="fs-5 fw-bold text-success">Accurate Prediction</h3>
+            <p>Utilizes a trained Decision Tree Model to provide the best-fit fertilizer for your specific needs.</p>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card p-4 h-100">
+            <h3 class="fs-5 fw-bold text-success">Comprehensive Data</h3>
+            <p>Considers NPK, pH, Moisture, Temperature, Organic Carbon, Soil Type, and Crop Type.</p>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card p-4 h-100">
+            <h3 class="fs-5 fw-bold text-success">Save Resources</h3>
+            <p>Avoids the overuse of expensive and potentially harmful fertilizers by suggesting precise recommendations.</p>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
