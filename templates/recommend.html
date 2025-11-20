@@ -54,60 +54,62 @@
     <div class="col-md-11 col-lg-10">
         <div class="card p-4">
             <div class="card-body">
-                <h1 class="card-title text-center mb-2">Precision Fertilizer Advisor 🌾</h1>
+                <h1 class="card-title text-center mb-2">Precision Fertilizer Advisor </h1>
                 <p class="text-center text-secondary mb-5">
-                    Enter the parameters below for an **AI-driven, tailored recommendation** to optimize your crop's yield and health.
+                    Enter the parameters below for an <strong>AI-driven, tailored recommendation</strong> to optimize your crop's yield and health.
                 </p>
 
                 <form id="predictionForm" class="row g-4">
-                    
+
+                    <!-- Environmental -->
                     <fieldset class="col-12 border p-3 rounded-3 mb-4">
                         <legend class="w-auto px-2">1. Environmental Conditions</legend>
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <label for="temperature" class="form-label">Temperature (C)</label>
-                                <input type="number" step="0.01" class="form-control" id="temperature" value="25" required aria-describedby="tempHelp">
-                                <span id="tempHelp" class="form-text text-muted">Typical range: 10°C - 40°C</span>
+                                <input type="number" step="0.01" class="form-control" id="temperature" value="25" required>
                             </div>
+
                             <div class="col-md-4">
-                                <label for="moisture" class="form-label">Moisture (%)</label>
-                                <input type="number" step="0.01" class="form-control" id="moisture" value="60" required aria-describedby="moistureHelp">
-                                <span id="moistureHelp" class="form-text text-muted">Soil water content percentage.</span>
+                                <label for="moisture" class="form-label">Moisture (0–1)</label>
+                                <input type="number" step="0.01" min="0" max="1" class="form-control" id="moisture" value="0.60" required>
                             </div>
+
                             <div class="col-md-4">
                                 <label for="ph" class="form-label">PH Value</label>
-                                <input type="number" step="0.01" class="form-control" id="ph" value="6.5" required aria-describedby="phHelp">
-                                <span id="phHelp" class="form-text text-muted">Acidity/Alkalinity (1-14). Ideal is 6.0 - 7.5.</span>
+                                <input type="number" step="0.01" class="form-control" id="ph" value="6.5" required>
                             </div>
                         </div>
                     </fieldset>
 
+                    <!-- Nutrients -->
                     <fieldset class="col-12 border p-3 rounded-3 mb-4">
-                        <legend class="w-auto px-2">2. Soil Nutrient Levels (NPK)</legend>
+                        <legend class="w-auto px-2">2. Soil Nutrient Levels </legend>
                         <div class="row g-3">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label for="nitrogen" class="form-label">Nitrogen (N) (kg/ha)</label>
                                 <input type="number" step="0.01" class="form-control" id="nitrogen" value="70" required>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label for="phosphorous" class="form-label">Phosphorous (P) (kg/ha)</label>
                                 <input type="number" step="0.01" class="form-control" id="phosphorous" value="50" required>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label for="potassium" class="form-label">Potassium (K) (kg/ha)</label>
                                 <input type="number" step="0.01" class="form-control" id="potassium" value="50" required>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label for="carbon" class="form-label">Organic Carbon (%)</label>
+                                <input type="number" step="0.01" class="form-control" id="carbon" value="1.5" required>
                             </div>
                         </div>
                     </fieldset>
 
+                    <!-- Soil & Crop -->
                     <fieldset class="col-12 border p-3 rounded-3 mb-4">
                         <legend class="w-auto px-2">3. Soil & Crop Context</legend>
                         <div class="row g-3">
-                            <div class="col-md-4">
-                                <label for="carbon" class="form-label">Organic Carbon (%)</label>
-                                <input type="number" step="0.01" class="form-control" id="carbon" value="1.5" required aria-describedby="carbonHelp">
-                                <span id="carbonHelp" class="form-text text-muted">Indicates soil fertility and health.</span>
-                            </div>
 
                             <div class="col-md-4">
                                 <label for="soil" class="form-label">Soil Type</label>
@@ -128,12 +130,14 @@
                                     {% endfor %}
                                 </select>
                             </div>
+
                         </div>
                     </fieldset>
-                    
+
+                    <!-- Submit -->
                     <div class="col-12 mt-4 text-center">
                         <button type="submit" class="btn btn-lg btn-success w-75 py-3 shadow-lg">
-                            <span class="loading-spinner spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            <span class="loading-spinner spinner-border spinner-border-sm me-2"></span>
                             Generate Recommendation
                         </button>
                     </div>
@@ -154,69 +158,61 @@
 <script>
     document.getElementById('predictionForm').addEventListener('submit', async function(event) {
         event.preventDefault();
-        
+
         const form = event.target;
         const submitButton = form.querySelector('button[type="submit"]');
-        const loadingSpinner = form.querySelector('.loading-spinner');
         const resultBox = document.getElementById('resultBox');
         const resultText = document.getElementById('resultText');
 
-        // Show loading state and disable button
+        // Button loading
         submitButton.disabled = true;
-        submitButton.innerHTML = '<span class="loading-spinner spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...';
+        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Processing...';
         resultBox.style.display = 'none';
-        
-        // Gather data from the form
+        resultBox.classList.remove('error');
+
+        // Moisture is already 0–1 (NO conversion)
+        const moistureValue = parseFloat(document.getElementById('moisture').value);
+
+        // Collect Data
         const inputData = {
             Temperature: document.getElementById('temperature').value,
-            Moisture: document.getElementById('moisture').value,
+            Moisture: moistureValue,
             PH: document.getElementById('ph').value,
             Nitrogen: document.getElementById('nitrogen').value,
             Phosphorous: document.getElementById('phosphorous').value,
             Potassium: document.getElementById('potassium').value,
             Carbon: document.getElementById('carbon').value,
             Soil: document.getElementById('soil').value,
-            Crop: document.getElementById('crop').value,
+            Crop: document.getElementById('crop').value
         };
 
         try {
             const response = await fetch('/predict', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(inputData)
             });
 
             const data = await response.json();
-
-            // Reset result box classes
-            resultBox.classList.remove('error');
-            resultBox.classList.add('animate__animated', 'animate__fadeIn'); // Optional: Add animation if you use Animate.css
+            resultBox.classList.add('animate__animated', 'animate__fadeIn');
 
             if (response.ok && data.success) {
                 resultText.textContent = data.fertilizer_recommendation;
-                resultBox.style.display = 'block';
-                resultBox.querySelector('h4').textContent = '✅ Recommended Fertilizer:';
-                
+                resultBox.querySelector('h4').textContent = ' Recommended Fertilizer:';
             } else {
-                // Handle API error or validation error
-                const errorMessage = data.error || 'Prediction failed due to an unknown server error.';
-                resultText.textContent = errorMessage;
-                resultBox.style.display = 'block';
-                resultBox.classList.add('error'); // Apply error styling
-                resultBox.querySelector('h4').textContent = '⚠️ Recommendation Error:';
+                resultText.textContent = data.error || 'Prediction failed.';
+                resultBox.classList.add('error');
+                resultBox.querySelector('h4').textContent = '⚠️ Error:';
             }
 
-        } catch (error) {
-            console.error('Fetch error:', error);
+            resultBox.style.display = 'block';
+
+        } catch (err) {
             resultBox.classList.add('error');
-            resultText.textContent = 'Network Error: Could not connect to the server.';
+            resultText.textContent = 'Network Error: Could not connect to server.';
             resultBox.style.display = 'block';
             resultBox.querySelector('h4').textContent = '⚠️ Connection Error:';
-            
         } finally {
-            // Re-enable button
             submitButton.disabled = false;
             submitButton.innerHTML = 'Generate Recommendation';
         }
